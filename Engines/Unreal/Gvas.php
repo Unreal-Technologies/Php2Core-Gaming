@@ -55,6 +55,26 @@ class Gvas extends \Php2Core\IO\File
         return $res;
     }
     
+    public function save()
+    {
+        $bsw = new \Php2Core\IO\Data\BinaryStreamWriter();
+        
+        $this -> oHeader -> save($bsw);
+        
+        echo '<xmp>';
+        var_dump(__FILE__.':'.__LINE__);
+        print_r($bsw);
+        echo '</xmp>';
+        
+        $data = [
+            'type' => (string)$this -> iSaveType,
+            'data' => (string)$bsw
+        ];
+        
+        $file = \Php2Core\IO\File::fromDirectory($this ->parent(), $this ->basename().'.gvas2');
+        $file -> write(serialize($data));
+    }
+    
     /**
      * @param string $path
      * @param mixed $value
