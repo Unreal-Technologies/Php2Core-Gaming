@@ -1,0 +1,1 @@
+https://github.com/cheahjs/palworld-save-tools/blob/main/palworld_save_tools/paltypes.py

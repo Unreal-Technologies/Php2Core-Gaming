@@ -56,6 +56,57 @@ class Gvas extends \Php2Core\IO\File
     }
     
     /**
+     * @param string $path
+     * @param mixed $value
+     * @return void
+     */
+    public function set(string $path, mixed $value): void
+    {
+        $parts = explode('/', $path);
+        $current = '$this -> aProperties';
+        
+        foreach($parts as $part)
+        {
+            $temp = $current.'[\''.$part.'\']';
+            
+            $exists = false;
+            eval('$exists = isset('.$temp.');');
+            
+            if(!$exists)
+            {
+                return;
+            }
+            
+            $current = $temp.'[\'value\']';
+        }
+        eval($current.' = \''.$value.'\';');
+    }
+    
+    /**
+     * @param string $path
+     * @return mixed
+     */
+    public function get(string $path): mixed
+    {
+        $parts = explode('/', $path);
+        $current = $this -> aProperties;
+        
+        foreach($parts as $part)
+        {
+            if(isset($current[$part]))
+            {
+                $current = $current[$part]['value'];
+            }
+            else
+            {
+                return null;
+            }
+        }
+        
+        return $current;
+    }
+    
+    /**
      * @return void
      */
     private function initialize(): void
