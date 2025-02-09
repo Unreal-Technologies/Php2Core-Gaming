@@ -1,5 +1,5 @@
 <?php
-namespace Php2Core\Gaming\UnrealEngine\Gvas;
+namespace Php2Core\Gaming\Engines\Unreal\Gvas;
 
 class Header
 {
