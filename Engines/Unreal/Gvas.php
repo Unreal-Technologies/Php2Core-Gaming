@@ -57,24 +57,24 @@ class Gvas extends \Php2Core\IO\File
     
     public function save()
     {
-//        $bsw = new \Php2Core\IO\Data\BinaryStreamWriter();
-//        
-//        $this -> oHeader -> save($bsw);
-//        $this -> savePropertiesRecursive($bsw, $this -> aProperties);
-//        
-//        echo '<xmp>';
-//        var_dump(__FILE__.':'.__LINE__);
-////        print_r($this -> aProperties);
-//        print_r($bsw);
-//        echo '</xmp>';
-//        
-//        $data = [
-//            'type' => (string)$this -> iSaveType,
-//            'data' => (string)$bsw
-//        ];
-//        
-//        $file = \Php2Core\IO\File::fromDirectory($this ->parent(), $this ->basename().'.gvas2');
-//        $file -> write(serialize($data));
+        $wt = new Gvas\Writer();
+        
+        $this -> oHeader -> save($wt);
+        $wt -> properties($this -> aProperties);
+        
+        echo '<xmp>';
+        var_dump(__FILE__.':'.__LINE__);
+//        print_r($this -> aProperties);
+        print_r($wt);
+        echo '</xmp>';
+        
+        $data = [
+            'type' => (string)$this -> iSaveType,
+            'data' => (string)$wt
+        ];
+        
+        $file = \Php2Core\IO\File::fromDirectory($this ->parent(), $this ->basename().'.gvas2');
+        $file -> write(serialize($data));
     }
     
     private function savePropertiesRecursive(\Php2Core\IO\Data\BinaryStreamWriter $bsw, array $properties)
