@@ -4,6 +4,14 @@ namespace Php2Core\Gaming\Engines\Unreal\Gvas;
 class Writer extends \Php2Core\IO\Data\BinaryStreamWriter
 {
     /**
+     * @return void
+     */
+    public function trailer(): void
+    {
+        $this -> write(chr(0).chr(0).chr(0).chr(0), 4);
+    }
+    
+    /**
      * @param array $properties
      * @return void
      */
@@ -158,21 +166,26 @@ class Writer extends \Php2Core\IO\Data\BinaryStreamWriter
         return $this -> tell() - $start;
     }
     
-    private function structValue(string $structType, array $struct): int
+    private function structValue(string $structType, mixed $value): void
     {
         switch($structType)
         {
-            case 'PalOptionWorldSaveData': //gonna be default later on
-            case 'PalOptionWorldSettings':
-                $this -> properties($struct);
-                return 0;
-            default:
+            case 'DateTime':
+                $this -> u64($value);
+                break;
+            case 'Vector':
+            case 'Guid':
+            case 'Quat':
+            case 'LinearColor':
                 echo '<xmp>';
                 var_dump(__FILE__.':'.__LINE__);
                 var_dumP($structType);
-                print_r($struct);
+                print_r($value);
                 echo '</xmp>';
-                return 0;
+                break;
+            default:
+                $this -> properties($value);
+                break;
         }
 //        if struct_type == "Vector":
 //            self.vector_dict(value)

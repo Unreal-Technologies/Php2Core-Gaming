@@ -61,12 +61,7 @@ class Gvas extends \Php2Core\IO\File
         
         $this -> oHeader -> save($wt);
         $wt -> properties($this -> aProperties);
-        
-        echo '<xmp>';
-        var_dump(__FILE__.':'.__LINE__);
-//        print_r($this -> aProperties);
-        print_r($wt);
-        echo '</xmp>';
+        $wt -> trailer();
         
         $data = [
             'type' => (string)$this -> iSaveType,
@@ -76,43 +71,7 @@ class Gvas extends \Php2Core\IO\File
         $file = \Php2Core\IO\File::fromDirectory($this ->parent(), $this ->basename().'.gvas2');
         $file -> write(serialize($data));
     }
-    
-    private function savePropertiesRecursive(\Php2Core\IO\Data\BinaryStreamWriter $bsw, array $properties)
-    {
-        foreach($properties as $name => $property)
-        {
-            $bsw -> fString($name);
-            $bsw -> fString($property['path']);
-            switch($property['path'])
-            {
-                case 'IntProperty':
-                    $bsw -> u64(4);
-                    $bsw -> optionalGuid($property['id']);
-                    $bsw -> i32($property['value']);
-                    break;
-                case 'StructProperty':
-                    $bsw -> u64(0);
-                    $bsw -> fString($property['struct_type']);
-                    
-                    echo '<xmp>';
-                    var_dump(__FILE__.':'.__LINE__);
-                    var_dump($name);
-                    print_r($property);
-                    echo '</xmp>';
-                    break 2;
-                    break;
-                default:
-                    echo '<xmp>';
-                    var_dump(__FILE__.':'.__LINE__);
-                    var_dump($name);
-                    print_r($property);
-                    echo '</xmp>';
-                break;
-            }
-        }
-//        $bsw -> fString('None');
-    }
-    
+
     /**
      * @param string $path
      * @param mixed $value
