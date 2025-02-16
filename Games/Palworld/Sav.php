@@ -78,8 +78,8 @@ class Sav extends \Php2Core\IO\File
      */
     private function binaryDecode(string $bytes): array
     {
-        $uncompressedLength = unpack('v', substr($bytes, 0, 4))[1];
-        $compressedLength = unpack('v', substr($bytes, 4, 4))[1];
+        $uncompressedLength = unpack('V', substr($bytes, 0, 4))[1];
+        $compressedLength = unpack('V', substr($bytes, 4, 4))[1];
         $magicBytes = substr($bytes, 8, 3);
         $saveType = substr($bytes, 11, 1);
 
@@ -87,8 +87,8 @@ class Sav extends \Php2Core\IO\File
         
         if($magicBytes === 'CNK')
         {
-            $uncompressedLength = unpack('v', substr($bytes, 12, 4))[1];
-            $compressedLength = unpack('v', substr($bytes, 16, 4))[1];
+            $uncompressedLength = unpack('V', substr($bytes, 12, 4))[1];
+            $compressedLength = unpack('V', substr($bytes, 16, 4))[1];
             $magicBytes = substr($bytes, 20, 3);
             $saveType = substr($bytes, 23, 1);
             $startOffset = 24;
@@ -108,8 +108,8 @@ class Sav extends \Php2Core\IO\File
         {
             throw new \Php2Core\Exceptions\NotImplementedException('incorrect compressed length: '.$compressedLength);
         }
-        
-        $uncompressedData = zlib_decode(substr($bytes, $startOffset, $compressedLength));
+		
+        $uncompressedData = zlib_decode(substr($bytes, $startOffset));
         if($saveType === '2')
         {
             if($compressedLength !== strlen($uncompressedData))
