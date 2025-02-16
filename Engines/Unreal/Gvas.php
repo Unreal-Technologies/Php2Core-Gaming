@@ -68,7 +68,7 @@ class Gvas extends \Php2Core\IO\File
             'data' => (string)$wt
         ];
         
-        $file = \Php2Core\IO\File::fromDirectory($this ->parent(), $this ->basename().'.gvas2');
+        $file = \Php2Core\IO\File::fromDirectory($this -> parent(), $this -> basename().'.gvas2');
         $file -> write(serialize($data));
     }
 

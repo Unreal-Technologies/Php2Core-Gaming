@@ -122,22 +122,5 @@ class Writer extends \Php2Core\IO\Data\BinaryStreamWriter
                 $this -> properties($value);
                 break;
         }
-//        if struct_type == "Vector":
-//            self.vector_dict(value)
-//        elif struct_type == "DateTime":
-//            self.u64(value)
-//        elif struct_type == "Guid":
-//            self.guid(value)
-//        elif struct_type == "Quat":
-//            self.quat_dict(value)
-//        elif struct_type == "LinearColor":
-//            self.float(value["r"])
-//            self.float(value["g"])
-//            self.float(value["b"])
-//            self.float(value["a"])
-//        else:
-//            if self.debug:
-//                print(f"Assuming struct type: {struct_type}")
-//            return self.properties(value)
     }
 }
