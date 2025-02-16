@@ -36,6 +36,20 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
         $value = null;
         switch($typeName)
         {
+			case 'EnumProperty':
+				$enumType = $this -> fString();
+				$id = $this -> optionalGuid();
+				$enumValue = $this -> fString();
+				$value = [
+					'path' => $path,
+					'id' => $id,
+					'value' => [
+						'type' => $enumType,
+						'value' => $enumValue
+					]
+				];
+				
+				break;			
             case 'MapProperty':
                 $keyType = $this -> fString();
                 $valueType = $this -> fString();
