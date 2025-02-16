@@ -102,4 +102,28 @@ class Header
         });
         $this -> sSaveGameClassName = $bsr -> fstring();
     }
+    
+    /**
+     * @param \Php2Core\IO\Data\BinaryStreamWriter $bsw
+     * @return void
+     */
+    public function save(\Php2Core\IO\Data\BinaryStreamWriter $bsw): void
+    {
+        $bsw -> i32($this -> iMagic);
+        $bsw -> i32($this -> iSavegameVersion);
+        $bsw -> i32($this -> iPackageFileVersionUe4);
+        $bsw -> i32($this -> iPackageFileVersionUe5);
+        $bsw -> u16($this -> iEngineVersionMajor);
+        $bsw -> u16($this -> iEngineVersionMinor);
+        $bsw -> u16($this -> iEngineVersionPatch);
+        $bsw -> i32($this -> iEngineVersionChangelist);
+        $bsw -> fString($this -> sEngineVersionBranch);
+        $bsw -> i32($this -> iCustomVersionFormat);
+        $bsw -> tArray($this -> aCustomVersions, function(\Php2Core\IO\Data\BinaryStreamWriter $bsw, mixed $value)
+        {
+            $bsw -> guid($value[0]);
+            $bsw -> i32($value[1]);
+        });
+        $bsw -> fString($this -> sSaveGameClassName);
+    }
 }
