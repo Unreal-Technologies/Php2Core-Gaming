@@ -22,40 +22,11 @@ class Gvas extends \Php2Core\IO\File
      * @var Gvas\Reader|null
      */
     private ?Gvas\Reader $rd = null;
-    
-    #[\Override]
-    public function write(string $sStream, bool $bCreateDirectory = true): void 
-    {
-        parent::write($sStream, $bCreateDirectory);
-        
-        $this -> initialize();
-    }
-    
-    #[\Override]
-    public static function fromString(string $sPath): \Php2Core\IO\IFile 
-    {
-        $res = parent::fromString($sPath);
-        $res -> initialize();
-        return $res;
-    }
-    
-    #[\Override]
-    public static function fromFile(\Php2Core\IO\IFile $oFile): \Php2Core\IO\IFile 
-    {
-        $res = parent::fromFile($oFile);
-        $res -> initialize();
-        return $res;
-    }
-    
-    #[\Override]
-    public static function fromDirectory(\Php2Core\IO\IDirectory $oDir, string $sName): ?\Php2Core\IO\IFile
-    {
-        $res = parent::fromDirectory($oDir, $sName);
-        $res -> initialize();
-        return $res;
-    }
-    
-    public function save()
+
+	/**
+	 * 
+	 */
+    public function save(): void
     {
         $wt = new Gvas\Writer();
         
@@ -126,7 +97,7 @@ class Gvas extends \Php2Core\IO\File
     /**
      * @return void
      */
-    private function initialize(): void
+    public function initialize(IGvasData $iGvasData): void
     {
         if(!$this -> exists())
         {
@@ -140,7 +111,7 @@ class Gvas extends \Php2Core\IO\File
         
         $data = unserialize($bytes);
         $this -> iSaveType = $data['type'];
-        $this -> rd = new Gvas\Reader($data['data']);
+        $this -> rd = new Gvas\Reader($data['data'], $iGvasData);
         
         $this -> oHeader = new Gvas\Header($this -> rd);
         $this -> aProperties = $this -> rd -> propertiesUntilEnd();

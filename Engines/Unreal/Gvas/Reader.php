@@ -3,6 +3,22 @@ namespace Php2Core\Gaming\Engines\Unreal\Gvas;
 
 class Reader extends \Php2Core\IO\Data\BinaryStreamReader
 {
+	/**
+	 * @var \Php2Core\Gaming\Engines\Unreal\IGvasData|null
+	 */
+	private ?\Php2Core\Gaming\Engines\Unreal\IGvasData $oIGvasData = null;
+	
+	/**
+     * @param string $stream
+	 * @param \Php2Core\Gaming\Engines\Unreal\IGvasData $oIGvasData
+     */
+	#[\Override]
+    public function __construct(string $stream, \Php2Core\Gaming\Engines\Unreal\IGvasData $oIGvasData) 
+    {
+		parent::__construct($stream);
+		$this -> oIGvasData = $oIGvasData;
+    }
+	
     /**
      * @return array
      */
@@ -19,11 +35,26 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
             $typeName = $this -> fString();
             $size = $this -> u64();
             
-            $properties[$name] = $this -> property($name, $typeName, $size, $path);
+            $properties[$name] = $this -> property($name, $typeName, $size, $path.'.'.$name);
         }
         return $properties;
     }
     
+	/**
+	 * @param string $key
+	 * @param string $default
+	 * @return string
+	 */
+	private function getTypeOr(string $key, string $default): string
+	{
+		$typeHints = $this -> oIGvasData -> TypeHints();
+		if(isset($typeHints[$key]))
+		{
+			return $typeHints[$key];
+		}
+		return $default;
+	}
+	
     /**
      * @param string $name
      * @param string $typeName
@@ -32,7 +63,6 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
      */
     private function property(string $name, string $typeName, string $size, ?string $path=null): ?array
     {
-        $path .= ($path === null ? '' : '/').$typeName;
         $value = null;
         switch($typeName)
         {
@@ -57,25 +87,25 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
                 $this -> u32();
                 $count = $this -> u32();
                 
+				$keyPath = $path.'.Key';
                 $keyStructType = null;
                 if($keyType === 'StructProperty')
                 {
-                    //key_struct_type = self.get_type_or(key_path, "Guid")
-                    throw new \Php2Core\Exceptions\NotImplementedException();
+					$keyStructType = $this -> getTypeOr($keyPath, 'Guid');
                 }
                 
+				$valuePath = $path.'.Value';
                 $valueStructType = null;
                 if($valueType === 'StructProperty')
                 {
-                    //value_struct_type = self.get_type_or(value_path, "StructProperty")
-                    throw new \Php2Core\Exceptions\NotImplementedException();
+					$valueStructType = $this -> getTypeOr($valuePath, 'StructProperty');
                 }
                 
                 $values = [];
                 for($i=0; $i<$count; $i++)
                 {
-                    $key = $this -> propertyValue($keyType, $keyStructType);
-                    $value = $this -> propertyValue($valueType, $valueStructType);
+                    $key = $this -> propertyValue($keyType, $keyStructType, $keyPath);
+                    $value = $this -> propertyValue($valueType, $valueStructType, $valuePath);
                     $values[] = [
                         'key' => $key,
                         'value' => $value
@@ -99,7 +129,7 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
                     'path' => $path,
                     'array_type' => $arrayType,
                     'id' => $this -> optionalGuid(),
-                    'value' => $this -> arrayProperty($arrayType, $size - 4)
+                    'value' => $this -> arrayProperty($arrayType, $size - 4, $path)
                 ];
                 break;
             case 'NameProperty':
@@ -165,7 +195,7 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
      * @param string $structType
      * @return type
      */
-    private function structValue(string $structType): mixed
+    private function structValue(string $structType, string $path=null): mixed
     {
         switch($structType)
         {
@@ -180,7 +210,7 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
             case 'Quat':
                 return $this -> quatDict();
             default:
-                return $this -> propertiesUntilEnd();
+                return $this -> propertiesUntilEnd($path);
         }
     }
     
@@ -228,7 +258,7 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
      * @return mixed
      * @throws \Php2Core\Exceptions\UnexpectedValueException
      */
-    private function propertyValue(string $typeName, ?string $structTypeName): mixed
+    private function propertyValue(string $typeName, ?string $structTypeName, string $path): mixed
     {
         switch($typeName)
         {
@@ -237,7 +267,7 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
             case 'IntProperty':
                 return $this -> i32();
             case 'StructProperty':
-                return $this -> structValue($structTypeName);
+                return $this -> structValue($structTypeName, $path);
             case 'EnumProperty':
             case 'NameProperty':
                 return $this -> fString();
@@ -253,7 +283,7 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
      * @param int $size
      * @return array
      */
-    private function arrayProperty(string $arrayType, int $size): array
+    private function arrayProperty(string $arrayType, int $size, string $path): array
     {
         $count = $this -> u32();
         $value =  null;
@@ -269,7 +299,7 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
             $propValues = [];
             for($i=0; $i<$count; $i++)
             {
-                $propValues[] = $this -> structValue($typeName);
+                $propValues[] = $this -> structValue($typeName, $path.'.'.$propName);
             }
             
             $value = [
@@ -283,7 +313,7 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
         else
         {
             $value = [
-                'values' => $this -> arrayValue($arrayType, $count, $size)
+                'values' => $this -> arrayValue($arrayType, $count, $size, $path)
             ];
         }
         return $value;
@@ -296,7 +326,7 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
      * @return array
      * @throws \Php2Core\Exceptions\NotImplementedException
      */
-    private function arrayValue(string $arrayType, int $count, int $size): array
+    private function arrayValue(string $arrayType, int $count, int $size, string $path): array
     {
         $values = [];
         $callback = null;

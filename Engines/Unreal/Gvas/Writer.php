@@ -101,6 +101,11 @@ class Writer extends \Php2Core\IO\Data\BinaryStreamWriter
         return $this -> tell() - $start;
     }
     
+	/**
+	 * @param string $structType
+	 * @param mixed $value
+	 * @return void
+	 */
     private function structValue(string $structType, mixed $value): void
     {
         switch($structType)
