@@ -3,6 +3,78 @@ namespace Php2Core\Gaming\Games\Palworld;
 
 class StaticData implements \Php2Core\Gaming\Engines\Unreal\IGvasData
 {
+	/**
+	 * @return [\Closure, \Closure]
+	 */
+	public function CustomProperties(): array
+	{
+		return [
+			'.worldSaveData.GroupSaveDataMap' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\Group::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\Group::decode
+			],
+			'.worldSaveData.CharacterSaveParameterMap.Value.RawData' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\Character::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\Character::decode
+			],
+			'.worldSaveData.ItemContainerSaveData.Value.RawData' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\ItemContainer::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\ItemContainer::decode
+			],
+			'.worldSaveData.ItemContainerSaveData.Value.Slots.Slots.RawData' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\ItemContainerSlot::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\ItemContainerSlot::decode
+			],
+			'.worldSaveData.CharacterContainerSaveData.Value.RawData' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\Debug::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\Debug::decode
+			],
+			'.worldSaveData.CharacterContainerSaveData.Value.Slots.Slots.RawData' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\CharacterContainer::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\CharacterContainer::decode
+			],
+			'.worldSaveData.DynamicItemSaveData.DynamicItemSaveData.RawData' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\DynamicItem::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\DynamicItem::decode
+			],
+			'.worldSaveData.FoliageGridSaveDataMap.Value.ModelMap.Value.RawData' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\FoliageModel::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\FoliageModel::decode
+			],
+			'.worldSaveData.FoliageGridSaveDataMap.Value.ModelMap.Value.InstanceDataMap.Value.RawData' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\FoliageModelInstance::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\FoliageModelInstance::decode
+			],
+			'.worldSaveData.BaseCampSaveData.Value.RawData' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\BaseCamp::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\BaseCamp::decode
+			],
+			'.worldSaveData.BaseCampSaveData.Value.WorkerDirector.RawData' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\WorkerDirector::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\WorkerDirector::decode
+			],
+			'.worldSaveData.BaseCampSaveData.Value.WorkCollection.RawData' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\WorkCollection::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\WorkCollection::decode
+			],
+			'.worldSaveData.BaseCampSaveData.Value.ModuleMap' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\BaseCampModule::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\BaseCampModule::decode
+			],
+			'.worldSaveData.WorkSaveData' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\Work::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\Work::decode
+			],
+			'.worldSaveData.MapObjectSaveData' => [
+				\Php2Core\Gaming\Games\Palworld\StaticData\MapObject::encode,
+				\Php2Core\Gaming\Games\Palworld\StaticData\MapObject::decode
+			]
+		];
+	}
+	
+	/**
+	 * @return array
+	 */
 	public function TypeHints(): array
 	{
 		return [
