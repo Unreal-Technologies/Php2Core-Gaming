@@ -19,4 +19,8 @@ enum PropertyTypes: string
 	case LinearColor = 'LinearColor';
 	case Vector = 'Vector';
 	case Quat = 'Quat';
+	case ByteProperty = 'ByteProperty';
+	case None = 'None';
+	case Int64Property = 'Int64Property';
+	case FixedPoint64 = 'FixedPoint64';
 }
