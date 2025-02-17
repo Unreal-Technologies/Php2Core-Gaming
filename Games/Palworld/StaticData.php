@@ -10,64 +10,154 @@ class StaticData implements \Php2Core\Gaming\Engines\Unreal\IGvasData
 	{
 		return [
 			'.worldSaveData.GroupSaveDataMap' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\Group::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\Group::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\Group::encode(); 
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\Group::decode($reader, $typeName, $size, $path); 
+				}
 			],
 			'.worldSaveData.CharacterSaveParameterMap.Value.RawData' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\Character::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\Character::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\Character::encode();
+				 },
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\Character::decode($reader, $typeName, $size, $path); 
+				}
 			],
 			'.worldSaveData.ItemContainerSaveData.Value.RawData' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\ItemContainer::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\ItemContainer::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\ItemContainer::encode();
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\ItemContainer::decode($reader, $typeName, $size, $path); 
+				}
 			],
 			'.worldSaveData.ItemContainerSaveData.Value.Slots.Slots.RawData' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\ItemContainerSlot::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\ItemContainerSlot::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\ItemContainerSlot::encode(); 
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array 
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\ItemContainerSlot::decode($reader, $typeName, $size, $path);
+				}
 			],
 			'.worldSaveData.CharacterContainerSaveData.Value.RawData' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\Debug::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\Debug::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\Debug::encode(); 
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array 
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\Debug::decode($reader, $typeName, $size, $path); 
+				}
 			],
 			'.worldSaveData.CharacterContainerSaveData.Value.Slots.Slots.RawData' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\CharacterContainer::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\CharacterContainer::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\CharacterContainer::encode(); 
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array 
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\CharacterContainer::decode($reader, $typeName, $size, $path); 
+				}
 			],
 			'.worldSaveData.DynamicItemSaveData.DynamicItemSaveData.RawData' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\DynamicItem::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\DynamicItem::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\DynamicItem::encode(); 
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array 
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\DynamicItem::decode($reader, $typeName, $size, $path); 
+				}
 			],
 			'.worldSaveData.FoliageGridSaveDataMap.Value.ModelMap.Value.RawData' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\FoliageModel::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\FoliageModel::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\FoliageModel::encode(); 
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array 
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\FoliageModel::decode($reader, $typeName, $size, $path); 
+				}
 			],
 			'.worldSaveData.FoliageGridSaveDataMap.Value.ModelMap.Value.InstanceDataMap.Value.RawData' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\FoliageModelInstance::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\FoliageModelInstance::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\FoliageModelInstance::encode(); 
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array 
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\FoliageModelInstance::decode($reader, $typeName, $size, $path); 
+				}
 			],
 			'.worldSaveData.BaseCampSaveData.Value.RawData' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\BaseCamp::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\BaseCamp::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\BaseCamp::encode(); 
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path) 
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\BaseCamp::decode($reader, $typeName, $size, $path); 
+				}
 			],
 			'.worldSaveData.BaseCampSaveData.Value.WorkerDirector.RawData' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\WorkerDirector::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\WorkerDirector::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\WorkerDirector::encode(); 
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array 
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\WorkerDirector::decode($reader, $typeName, $size, $path); 
+				}
 			],
 			'.worldSaveData.BaseCampSaveData.Value.WorkCollection.RawData' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\WorkCollection::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\WorkCollection::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\WorkCollection::encode(); 
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array 
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\WorkCollection::decode($reader, $typeName, $size, $path); 
+				}
 			],
 			'.worldSaveData.BaseCampSaveData.Value.ModuleMap' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\BaseCampModule::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\BaseCampModule::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\BaseCampModule::encode(); 
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array 
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\BaseCampModule::decode($reader, $typeName, $size, $path); 
+				}
 			],
 			'.worldSaveData.WorkSaveData' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\Work::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\Work::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\Work::encode(); 
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array 
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\Work::decode($reader, $typeName, $size, $path); 
+				}
 			],
 			'.worldSaveData.MapObjectSaveData' => [
-				\Php2Core\Gaming\Games\Palworld\StaticData\MapObject::encode,
-				\Php2Core\Gaming\Games\Palworld\StaticData\MapObject::decode
+				function() 
+				{ 
+					\Php2Core\Gaming\Games\Palworld\StaticData\MapObject::encode(); 
+				},
+				function(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array 
+				{ 
+					return \Php2Core\Gaming\Games\Palworld\StaticData\MapObject::decode($reader, $typeName, $size, $path); 
+				}
 			]
 		];
 	}

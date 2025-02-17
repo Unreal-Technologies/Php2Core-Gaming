@@ -35,7 +35,7 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
             $typeName = $this -> fString();
             $size = $this -> u64();
             
-            $properties[$name] = $this -> property($name, $typeName, $size, $path.'.'.$name);
+            $properties[$name] = $this -> property($name, $typeName, $size, $path.'.'.$name, '');
         }
         return $properties;
     }
@@ -61,117 +61,137 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
      * @param string $size
      * @return array|null
      */
-    private function property(string $name, string $typeName, string $size, ?string $path=null): ?array
+    private function property(string $name, string $typeName, string $size, ?string $path, ?string $nestedCallerPath): ?array
     {
-        $value = null;
-        switch($typeName)
-        {
-			case 'EnumProperty':
-				$enumType = $this -> fString();
-				$id = $this -> optionalGuid();
-				$enumValue = $this -> fString();
-				$value = [
-					'path' => $path,
-					'id' => $id,
-					'value' => [
-						'type' => $enumType,
-						'value' => $enumValue
-					]
-				];
-				
-				break;			
-            case 'MapProperty':
-                $keyType = $this -> fString();
-                $valueType = $this -> fString();
-                $id = $this -> optionalGuid();
-                $this -> u32();
-                $count = $this -> u32();
-                
-				$keyPath = $path.'.Key';
-                $keyStructType = null;
-                if($keyType === 'StructProperty')
-                {
-					$keyStructType = $this -> getTypeOr($keyPath, 'Guid');
-                }
-                
-				$valuePath = $path.'.Value';
-                $valueStructType = null;
-                if($valueType === 'StructProperty')
-                {
-					$valueStructType = $this -> getTypeOr($valuePath, 'StructProperty');
-                }
-                
-                $values = [];
-                for($i=0; $i<$count; $i++)
-                {
-                    $key = $this -> propertyValue($keyType, $keyStructType, $keyPath);
-                    $value = $this -> propertyValue($valueType, $valueStructType, $valuePath);
-                    $values[] = [
-                        'key' => $key,
-                        'value' => $value
-                    ];
-                }
-                
-                $value = [
-                    'path' => $path,
-                    'key_type' => $keyType,
-                    'value_type' => $valueType,
-                    'key_struct_type' => $keyStructType,
-                    'value_struct_type' => $valueStructType,
-                    'id' => $id,
-                    'value' => $values
-                ];
-                break;
-            case 'ArrayProperty':
-                $arrayType = $this -> fstring();
-                
-                $value = [
-                    'path' => $path,
-                    'array_type' => $arrayType,
-                    'id' => $this -> optionalGuid(),
-                    'value' => $this -> arrayProperty($arrayType, $size - 4, $path)
-                ];
-                break;
-            case 'NameProperty':
-            case 'StrProperty':
-                $value = [
-                    'path' => $path,
-                    'id' => $this -> optionalGuid(),
-                    'value' => $this -> fString()
-                ];
-                break;
-            case 'BoolProperty':
-                $value = [
-                    'path' => $path,
-                    'value' => $this -> bool(),
-                    'id' => $this -> optionalGuid()
-                ];
-                break;
-            case 'IntProperty':
-                $value = [
-                    'path' => $path,
-                    'id' => $this -> optionalGuid(),
-                    'value' => $this -> i32()
-                ];
-                break;
-            case 'FloatProperty':
-                $value = [
-                    'path' => $path,
-                    'id' => $this -> optionalGuid(),
-                    'value' => $this -> float()
-                ];
-                break;
-            case 'StructProperty':
-                $value = $this -> struct($path);
-                break;
-            default:
-                echo '<xmp>';
-                var_dump(__FILE__.':'.__LINE__);
-                var_dump($name);
-                var_dump($typeName);
-                var_dump($size);
-                echo '</xmp>';
-        }
+		$customProperties = $this -> oIGvasData -> CustomProperties();
+		$value = null;
+		
+		if(isset($customProperties[$path]) && ($path !== $nestedCallerPath || $nestedCallerPath === ''))
+		{
+			$value = $customProperties[$path][1]($this, $typeName, $size, $path);
+			$value['custom_type'] = $path;
+			
+			echo '<xmp>';
+			var_dump($path);
+			print_r($customProperties[$path]);
+			echo '</xmp>';
+			//		if path in self.custom_properties and (
+			//		            path is not nested_caller_path or nested_caller_path == ""
+			//		        ):
+			//		            value = self.custom_properties[path][0](self, type_name, size, path)
+			//		            value["custom_type"] = path
+		}
+		else
+		{
+	        switch($typeName)
+	        {
+				case 'EnumProperty':
+					$enumType = $this -> fString();
+					$id = $this -> optionalGuid();
+					$enumValue = $this -> fString();
+					$value = [
+						'path' => $path,
+						'id' => $id,
+						'value' => [
+							'type' => $enumType,
+							'value' => $enumValue
+						]
+					];
+					
+					break;			
+	            case 'MapProperty':
+	                $keyType = $this -> fString();
+	                $valueType = $this -> fString();
+	                $id = $this -> optionalGuid();
+	                $this -> u32();
+	                $count = $this -> u32();
+	                
+					$keyPath = $path.'.Key';
+	                $keyStructType = null;
+	                if($keyType === 'StructProperty')
+	                {
+						$keyStructType = $this -> getTypeOr($keyPath, 'Guid');
+	                }
+	                
+					$valuePath = $path.'.Value';
+	                $valueStructType = null;
+	                if($valueType === 'StructProperty')
+	                {
+						$valueStructType = $this -> getTypeOr($valuePath, 'StructProperty');
+	                }
+	                
+	                $values = [];
+	                for($i=0; $i<$count; $i++)
+	                {
+	                    $key = $this -> propertyValue($keyType, $keyStructType, $keyPath);
+	                    $value = $this -> propertyValue($valueType, $valueStructType, $valuePath);
+	                    $values[] = [
+	                        'key' => $key,
+	                        'value' => $value
+	                    ];
+	                }
+	                
+	                $value = [
+	                    'path' => $path,
+	                    'key_type' => $keyType,
+	                    'value_type' => $valueType,
+	                    'key_struct_type' => $keyStructType,
+	                    'value_struct_type' => $valueStructType,
+	                    'id' => $id,
+	                    'value' => $values
+	                ];
+	                break;
+	            case 'ArrayProperty':
+	                $arrayType = $this -> fstring();
+	                
+	                $value = [
+	                    'path' => $path,
+	                    'array_type' => $arrayType,
+	                    'id' => $this -> optionalGuid(),
+	                    'value' => $this -> arrayProperty($arrayType, $size - 4, $path)
+	                ];
+	                break;
+	            case 'NameProperty':
+	            case 'StrProperty':
+	                $value = [
+	                    'path' => $path,
+	                    'id' => $this -> optionalGuid(),
+	                    'value' => $this -> fString()
+	                ];
+	                break;
+	            case 'BoolProperty':
+	                $value = [
+	                    'path' => $path,
+	                    'value' => $this -> bool(),
+	                    'id' => $this -> optionalGuid()
+	                ];
+	                break;
+	            case 'IntProperty':
+	                $value = [
+	                    'path' => $path,
+	                    'id' => $this -> optionalGuid(),
+	                    'value' => $this -> i32()
+	                ];
+	                break;
+	            case 'FloatProperty':
+	                $value = [
+	                    'path' => $path,
+	                    'id' => $this -> optionalGuid(),
+	                    'value' => $this -> float()
+	                ];
+	                break;
+	            case 'StructProperty':
+	                $value = $this -> struct($path);
+	                break;
+	            default:
+	                echo '<xmp>';
+	                var_dump(__FILE__.':'.__LINE__);
+	                var_dump($name);
+	                var_dump($typeName);
+	                var_dump($size);
+	                echo '</xmp>';
+	        }
+		}
         return $value;
     }
     
@@ -376,4 +396,5 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
         
         return $values;
     }
+
 }

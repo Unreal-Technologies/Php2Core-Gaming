@@ -8,7 +8,7 @@ class FoliageModel implements \Php2Core\Gaming\Engines\Unreal\ICustomProperties
 		throw new \Php2Core\Exceptions\NotImplementedException(__CLASS__.'::encode');
 	}
 	
-	public static function decode()
+	public static function decode(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, string $typeName, int $size, string $path): array 
 	{
 		throw new \Php2Core\Exceptions\NotImplementedException(__CLASS__.'::decode');
 	}
