@@ -35,18 +35,18 @@ class Character implements \Php2Core\Gaming\Engines\Unreal\ICustomProperties
 	 */
 	private static function decodeBytes(\Php2Core\Gaming\Engines\Unreal\Gvas\Reader $reader, array $bytes): array
 	{
-		$buffer = [];
-		foreach($bytes as $stream)
-		{
-			$rd = new \Php2Core\Gaming\Engines\Unreal\Gvas\Reader($stream, $reader -> gvasData());
-			$data = [
-				'object' => $rd -> propertiesUntilEnd(),
-				'unknownBytes' => $rd -> bytes(4),
-				'groupId' => $rd -> guid()
-			];
-			
-			$buffer[] = $data;
-		}
-		return $buffer;
+            $buffer = [];
+            foreach($bytes as $stream)
+            {
+                $rd = new \Php2Core\Gaming\Engines\Unreal\Gvas\Reader($stream, $reader -> gvasData());
+                $data = [
+                    'object' => $rd -> propertiesUntilEnd(),
+                    'unknownBytes' => $rd -> bytes(4),
+                    'groupId' => $rd -> guid()
+                ];
+
+                $buffer[] = $data;
+            }
+            return $buffer;
 	}
 }

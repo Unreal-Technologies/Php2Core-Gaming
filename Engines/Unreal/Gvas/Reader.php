@@ -3,28 +3,28 @@ namespace Php2Core\Gaming\Engines\Unreal\Gvas;
 
 class Reader extends \Php2Core\IO\Data\BinaryStreamReader
 {
-	/**
-	 * @var \Php2Core\Gaming\Engines\Unreal\IGvasData|null
-	 */
-	private ?\Php2Core\Gaming\Engines\Unreal\IGvasData $oIGvasData = null;
-	
-	/**
-	 * @return \Php2Core\Gaming\Engines\Unreal\IGvasData;
-	 */
-	public function gvasData(): \Php2Core\Gaming\Engines\Unreal\IGvasData
-	{
-		return $this -> oIGvasData;
-	}
-	
-	/**
-     * @param string $stream
-	 * @param \Php2Core\Gaming\Engines\Unreal\IGvasData $oIGvasData
+    /**
+     * @var \Php2Core\Gaming\Engines\Unreal\IGvasData|null
      */
-	#[\Override]
+    private ?\Php2Core\Gaming\Engines\Unreal\IGvasData $oIGvasData = null;
+
+    /**
+     * @return \Php2Core\Gaming\Engines\Unreal\IGvasData;
+     */
+    public function gvasData(): \Php2Core\Gaming\Engines\Unreal\IGvasData
+    {
+        return $this -> oIGvasData;
+    }
+	
+    /**
+     * @param string $stream
+     * @param \Php2Core\Gaming\Engines\Unreal\IGvasData $oIGvasData
+     */
+    #[\Override]
     public function __construct(string $stream, \Php2Core\Gaming\Engines\Unreal\IGvasData $oIGvasData) 
     {
-		parent::__construct($stream);
-		$this -> oIGvasData = $oIGvasData;
+        parent::__construct($stream);
+        $this -> oIGvasData = $oIGvasData;
     }
 	
     /**
@@ -42,26 +42,26 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
             }
             $typeName = \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::fromString($this -> fString());
             $size = $this -> u64();
-            
+
             $properties[$name] = $this -> property($typeName, $size, $path.'.'.$name, '');
         }
         return $properties;
     }
-    
-	/**
-	 * @param string $key
-	 * @param \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes $default
-	 * @return \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes
-	 */
-	private function getTypeOr(string $key, \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes $default): \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes
-	{
-		$typeHints = $this -> oIGvasData -> TypeHints();
-		if(isset($typeHints[$key]))
-		{
-			return $typeHints[$key];
-		}
-		return $default;
-	}
+
+    /**
+     * @param string $key
+     * @param \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes $default
+     * @return \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes
+     */
+    private function getTypeOr(string $key, \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes $default): \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes
+    {
+        $typeHints = $this -> oIGvasData -> TypeHints();
+        if(isset($typeHints[$key]))
+        {
+            return $typeHints[$key];
+        }
+        return $default;
+    }
 	
     /**
      * @param \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes $typeName
@@ -70,145 +70,231 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
      */
     public function property(\Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes $typeName, string $size, ?string $path, ?string $nestedCallerPath): ?array
     {
-		$customProperties = $this -> oIGvasData -> CustomProperties();
-		$value = null;
-		
-		if(isset($customProperties[$path]) && ($path !== $nestedCallerPath || $nestedCallerPath === ''))
-		{
-			$value = $customProperties[$path][1]($this, $typeName, $size, $path);
-			$value['custom_type'] = $path;
-		}
-		else
-		{
-	        switch($typeName)
-	        {
-				case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::Int64Property:
-					$value = [
-						'id' => $this -> optionalGuid(),
-						'value' => $this -> i64()
-					];
-					
-					break;
-				case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::ByteProperty:
-					$enumType = \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::fromString($this -> fString());
-					$id = $this -> optionalGuid();
-					$enumValue = $enumType === \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::None ? $this -> byte() : $this -> fString();
-					
-					$value = [
-						'id' => $id,
-						'value' => [
-							'type' => $enumType,
-							'value' => $enumValue
-						]
-					];
-					break;
-				case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::EnumProperty:
-					$enumType = $this -> fString();
-					$id = $this -> optionalGuid();
-					$enumValue = $this -> fString();
-					$value = [
-						'path' => $path,
-						'id' => $id,
-						'value' => [
-							'type' => $enumType,
-							'value' => $enumValue
-						]
-					];
-					
-					break;			
-	            case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::MapProperty:
-	                $keyType = \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::fromString($this -> fString());
-	                $valueType = \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::fromString($this -> fString());
-	                $id = $this -> optionalGuid();
-	                $this -> u32();
-	                $count = $this -> u32();
-	                
-					$keyPath = $path.'.Key';
-	                $keyStructType = null;
-	                if($keyType === \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::StructProperty)
-	                {
-						$keyStructType = $this -> getTypeOr($keyPath, \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::Guid);
-	                }
-	                
-					$valuePath = $path.'.Value';
-	                $valueStructType = null;
-	                if($valueType === \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::StructProperty)
-	                {
-						$valueStructType = $this -> getTypeOr($valuePath, \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::StructProperty);
-	                }
-	                
-	                $values = [];
-	                for($i=0; $i<$count; $i++)
-	                {
-	                    $key = $this -> propertyValue($keyType, $keyStructType, $keyPath);
-	                    $value = $this -> propertyValue($valueType, $valueStructType, $valuePath);
-	                    $values[] = [
-	                        'key' => $key,
-	                        'value' => $value
-	                    ];
-	                }
-	                
-	                $value = [
-	                    'path' => $path,
-	                    'key_type' => $keyType,
-	                    'value_type' => $valueType,
-	                    'key_struct_type' => $keyStructType,
-	                    'value_struct_type' => $valueStructType,
-	                    'id' => $id,
-	                    'value' => $values
-	                ];
-	                break;
-	            case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::ArrayProperty:
-	                $arrayType = \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::fromString($this -> fstring());
-					
-	                $value = [
-	                    'path' => $path,
-	                    'array_type' => $arrayType,
-	                    'id' => $this -> optionalGuid(),
-	                    'value' => $this -> arrayProperty($arrayType, $size - 4, $path)
-	                ];
-	                break;
-	            case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::NameProperty:
-	            case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::StrProperty:
-	                $value = [
-	                    'path' => $path,
-	                    'id' => $this -> optionalGuid(),
-	                    'value' => $this -> fString()
-	                ];
-	                break;
-	            case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::BoolProperty:
-	                $value = [
-	                    'path' => $path,
-	                    'value' => $this -> bool(),
-	                    'id' => $this -> optionalGuid()
-	                ];
-	                break;
-	            case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::IntProperty:
-	                $value = [
-	                    'path' => $path,
-	                    'id' => $this -> optionalGuid(),
-	                    'value' => $this -> i32()
-	                ];
-	                break;
-	            case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::FloatProperty:
-	                $value = [
-	                    'path' => $path,
-	                    'id' => $this -> optionalGuid(),
-	                    'value' => $this -> float()
-	                ];
-	                break;
-	            case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::StructProperty:
-	                $value = $this -> struct($path);
-	                break;
-	            default:
-	                echo '<xmp>';
-	                var_dump(__FILE__.':'.__LINE__);
-	                var_dump($typeName);
-	                var_dump($size);
-	                echo '</xmp>';
-	        }
-		}
+        $customProperties = $this -> oIGvasData -> CustomProperties();
+        $value = null;
+
+        if(isset($customProperties[$path]) && ($path !== $nestedCallerPath || $nestedCallerPath === ''))
+        {
+            $value = $customProperties[$path][1]($this, $typeName, $size, $path);
+            $value['custom_type'] = $path;
+        }
+        else
+        {
+            switch($typeName)
+            {
+                case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::Int64Property:
+                    $value = [
+                        'id' => $this -> optionalGuid(),
+                        'value' => $this -> i64()
+                    ];
+
+                    break;
+                case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::ByteProperty:
+                    $enumType = \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::fromString($this -> fString());
+                    $id = $this -> optionalGuid();
+                    $enumValue = $enumType === \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::None ? $this -> byte() : $this -> fString();
+
+                    $value = [
+                        'id' => $id,
+                        'value' => [
+                            'type' => $enumType,
+                            'value' => $enumValue
+                        ]
+                    ];
+                    break;
+                case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::EnumProperty:
+                    $enumType = $this -> fString();
+                    $id = $this -> optionalGuid();
+                    $enumValue = $this -> fString();
+                    $value = [
+                        'path' => $path,
+                        'id' => $id,
+                        'value' => [
+                            'type' => $enumType,
+                            'value' => $enumValue
+                        ]
+                    ];
+
+                    break;			
+                case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::MapProperty:
+                    $keyType = $this -> fString();
+                    $keyTypeEnum = \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::fromString($keyType);
+                    $valueType = $this -> fString();
+                    $valueTypeEnum = \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::fromString($valueType);
+                    $id = $this -> optionalGuid();
+                    $this -> u32();
+                    $count = $this -> u32();
+
+                    $keyPath = $path.'.Key';
+                    $keyStructType = null;
+                    if($keyTypeEnum === \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::StructProperty)
+                    {
+                        $keyStructType = $this -> getTypeOr($keyPath, \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::Guid);
+                    }
+
+                    $valuePath = $path.'.Value';
+                    $valueStructType = null;
+                    if($valueTypeEnum === \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::StructProperty)
+                    {
+                        $valueStructType = $this -> getTypeOr($valuePath, \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::StructProperty);
+                    }
+                    
+                    $values = [];
+                    for($i=0; $i<$count; $i++)
+                    {
+                        $key = $this -> propertyValue($keyTypeEnum, $keyStructType, $keyPath);
+                        $value = $this -> propertyValue($valueTypeEnum, $valueStructType, $valuePath);
+                        $values[] = [
+                            'key' => $key,
+                            'value' => $value
+                        ];
+                    }
+
+                    $value = [
+                        'path' => $path,
+                        'key_type' => $keyType,
+                        'value_type' => $valueType,
+                        'key_struct_type' => $keyStructType,
+                        'value_struct_type' => $valueStructType,
+                        'id' => $id,
+                        'value' => $values
+                    ];
+                    break;
+                case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::ArrayProperty:
+                    $arrayType = \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::fromString($this -> fstring());
+
+                    $value = [
+                        'path' => $path,
+                        'array_type' => $arrayType,
+                        'id' => $this -> optionalGuid(),
+                        'value' => $this -> arrayProperty($arrayType, $size - 4, $path)
+                    ];
+                    break;
+                case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::NameProperty:
+                case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::StrProperty:
+                    $value = [
+                        'path' => $path,
+                        'id' => $this -> optionalGuid(),
+                        'value' => $this -> fString()
+                    ];
+                    break;
+                case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::BoolProperty:
+                    $value = [
+                        'path' => $path,
+                        'value' => $this -> bool(),
+                        'id' => $this -> optionalGuid()
+                    ];
+                    break;
+                case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::IntProperty:
+                    $value = [
+                        'path' => $path,
+                        'id' => $this -> optionalGuid(),
+                        'value' => $this -> i32()
+                    ];
+                    break;
+                case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::FloatProperty:
+                    $value = [
+                        'path' => $path,
+                        'id' => $this -> optionalGuid(),
+                        'value' => $this -> float()
+                    ];
+                    break;
+                case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::StructProperty:
+                    $value = $this -> struct($path);
+                    break;
+                default:
+                    echo '<xmp>';
+                    var_dump(__FILE__.':'.__LINE__);
+                    var_dump($typeName);
+                    var_dump($size);
+                    echo '</xmp>';
+            }
+        }
         return $value;
+    }
+    
+    /**
+     * @return string|null
+     */
+    public function optionalGuid(): ?string
+    {
+        $check = $this -> read(1);
+        if(ord($check) !== 0)
+        {
+            return $this -> guid();
+        }
+        return null;
+    }
+    
+    /**
+     * @return string
+     */
+    public function guid(): string
+    {
+        $data = $this -> read(16);
+        $b = [];
+        
+        for($i=0; $i<strlen($data); $i++)
+        {
+            $s = $data[$i];
+            $b[] = ord($s);
+        }
+
+        return sprintf(
+            '%08x-%04x-%04x-%04x-%04x%08x',
+            ($b[3] << 24) | ($b[2] << 16) | ($b[1] << 8) | $b[0],
+            ($b[7] << 8) | $b[6],
+            ($b[5] << 8) | $b[4],
+            ($b[0xb] << 8) | $b[0xa],
+            ($b[9] << 8) | $b[8],
+            ($b[0xf] << 24) | ($b[0xe] << 16) | ($b[0xd] << 8) | $b[0xc]
+        );
+    }
+    
+    /**
+     * @return string
+     */
+    public function fString(): string
+    {
+        $length = $this -> i32();
+        
+        if($length === 0)
+        {
+            return '';
+        }
+        
+        $encoding = null;
+        $data = null;
+        if($length < 0)
+        {
+            $length = -$length;
+            $data = substr($this -> read($length * 2), 0, -2);
+            $encoding = 'UTF-16LE';
+        }
+        else
+        {
+            $data = substr($this -> read($length), 0, -1);
+            $encoding = 'ascii';
+        }
+        
+        return mb_convert_encoding($data, 'UTF-8', $encoding);
+    }
+    
+    /**
+     * @param \Closure $closure
+     * @return array
+     */
+    public function tArray(\Closure $closure): array
+    {
+        $count = $this -> i32();
+        $buffer = [];
+
+        for($i=0; $i<$count; $i++)
+        {
+            $buffer[] = $closure($this);
+        }
+        
+        return $buffer;
     }
     
     /**
@@ -233,7 +319,7 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
      */
     private function structValue(string $structType, string $path=null): mixed
     {
-		$structTypeEnum = \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::fromString($structType);
+        $structTypeEnum = \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::fromString($structType);
 		
         switch($structTypeEnum)
         {
@@ -330,9 +416,10 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
             $propName = $this -> fString();
             $propType = $this -> fString();
             $this -> u64();
-			$typeName = $this -> fString();
+            
+            $typeName = $this -> fString();
             $typeNameEnum = \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::fromString($typeName);
-			$typeNameValue = $typeNameEnum === null ? $typeName : $typeNameEnum -> value;
+            $typeNameValue = $typeNameEnum === null ? $typeName : $typeNameEnum -> value;
 			
             $id = $this -> guid();
             $this -> skip(1);
@@ -367,7 +454,7 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
      * @return array
      * @throws \Php2Core\Exceptions\NotImplementedException
      */
-    private function arrayValue(\Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes $arrayType, int $count, int $size, string $path): array
+    private function arrayValue(\Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes $arrayType, int $count, int $size): array
     {
         $values = [];
         $callback = null;
@@ -390,10 +477,7 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
             case \Php2Core\Gaming\Engines\Unreal\Gvas\PropertyTypes::ByteProperty:
                 if($size === $count)
                 {
-                    $callback = function(\Php2Core\IO\Data\BinaryStreamReader $bsr) use($size)
-                    {
-                        return $bsr -> bytes($size);
-                    };
+                    return [ $this -> bytes($count) ];
                 }
                 else
                 {
