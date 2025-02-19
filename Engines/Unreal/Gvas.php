@@ -11,7 +11,7 @@ class Gvas extends \Php2Core\IO\File
     /**
      * @var Gvas\Header|null
      */
-    private ?Gvas\Header $oHeader = null;
+    private static ?Gvas\Header $oHeader = null;
     
     /**
      * @var array
@@ -23,14 +23,14 @@ class Gvas extends \Php2Core\IO\File
      */
     private ?Gvas\Reader $rd = null;
 
-	/**
-	 * 
-	 */
+    /**
+     * 
+     */
     public function save(): void
     {
         $wt = new Gvas\Writer();
         
-        $this -> oHeader -> save($wt);
+        self::$oHeader -> save($wt);
         $wt -> properties($this -> aProperties);
         $wt -> trailer();
         
@@ -113,7 +113,7 @@ class Gvas extends \Php2Core\IO\File
         $this -> iSaveType = $data['type'];
         $this -> rd = new Gvas\Reader($data['data'], $iGvasData);
         
-        $this -> oHeader = new Gvas\Header($this -> rd);
+        self::$oHeader = new Gvas\Header($this -> rd);
         $this -> aProperties = $this -> rd -> propertiesUntilEnd();
         $this -> rd = null;
         
