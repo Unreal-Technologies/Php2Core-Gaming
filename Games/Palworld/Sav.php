@@ -12,8 +12,8 @@ class Sav extends \Php2Core\IO\File
         $gvas = $this -> binaryDecode($this -> read());
         
         $file = \Php2Core\Gaming\Engines\Unreal\Gvas::fromDirectory($directory, $this -> basename().'.gvas');
+        $file -> write(serialize($gvas));
         $file -> initialize(new StaticData());
-		$file -> write(serialize($gvas));
 
         return $file;
     }

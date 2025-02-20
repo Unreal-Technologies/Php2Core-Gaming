@@ -24,9 +24,9 @@ class Gvas extends \Php2Core\IO\File
     private ?Gvas\Reader $rd = null;
 
     /**
-     * 
+     * @return \Php2Core\IO\IFile
      */
-    public function save(): void
+    public function save(): \Php2Core\IO\IFile
     {
         $wt = new Gvas\Writer();
         
@@ -39,8 +39,10 @@ class Gvas extends \Php2Core\IO\File
             'data' => (string)$wt
         ];
         
-        $file = \Php2Core\IO\File::fromDirectory($this -> parent(), $this -> basename().'.gvas2');
+        $file = \Php2Core\IO\File::fromDirectory($this -> parent(), $this -> basename().'.gvas.2');
         $file -> write(serialize($data));
+        
+        return $file;
     }
 
     /**
@@ -108,7 +110,7 @@ class Gvas extends \Php2Core\IO\File
         {
             return;
         }
-        
+
         $data = unserialize($bytes);
         $this -> iSaveType = $data['type'];
         $this -> rd = new Gvas\Reader($data['data'], $iGvasData);
