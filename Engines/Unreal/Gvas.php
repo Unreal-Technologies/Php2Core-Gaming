@@ -24,9 +24,9 @@ class Gvas extends \Php2Core\IO\File
     private ?Gvas\Reader $rd = null;
 
     /**
-     * @return \Php2Core\IO\IFile
+     * @return Gvas
      */
-    public function save(): \Php2Core\IO\IFile
+    public function save(): Gvas
     {
         $wt = new Gvas\Writer();
         
@@ -39,7 +39,7 @@ class Gvas extends \Php2Core\IO\File
             'data' => (string)$wt
         ];
         
-        $file = \Php2Core\IO\File::fromDirectory($this -> parent(), $this -> basename().'.gvas.2');
+        $file = Gvas::fromDirectory($this -> parent(), $this -> basename().'.temp.gvas');
         $file -> write(serialize($data));
         
         return $file;
@@ -69,7 +69,21 @@ class Gvas extends \Php2Core\IO\File
             
             $current = $temp.'[\'value\']';
         }
-        eval($current.' = \''.$value.'\';');
+        
+        $eval = 'if(!isset('.$current.'))'
+            . '{'
+                . 'throw new \Php2Core\Exceptions\NotImplementedException(\'Path not found: '.$path.'\');'
+            . '}'
+            . 'else if(is_array('.$current.')) '
+            . '{ '
+                . ''.$current.'[\'value\'] = \''.$value.'\';'
+            . '} '
+            . 'else '
+            . '{ '
+                . ''.$current.' = \''.$value.'\'; '
+            . '}';
+
+        eval($eval);
     }
     
     /**
