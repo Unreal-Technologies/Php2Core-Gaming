@@ -210,6 +210,8 @@ class Reader extends \Php2Core\IO\Data\BinaryStreamReader
                     echo '</xmp>';
             }
         }
+        $value['type'] = $typeName;
+        
         return $value;
     }
     

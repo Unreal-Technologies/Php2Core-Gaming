@@ -29,61 +29,72 @@ class Writer extends \Php2Core\IO\Data\BinaryStreamWriter
      * @param array $property
      * @return void
      */
-    private function property(array $property): void
+    public function property(array $property): void
     {
-        $this -> fString($property['path']);
+        $this -> fString($property['type'] -> value);
         
-        $nested = new Writer();
+        $nw = new Writer();
+        $size = $nw -> propertyInner($property['type'], $property);
+        $buffer = $nw -> bytes();
         
-        $size = $nested -> propertyNested($property['path'], $property);
-        $buffer = (string)$nested;
-
         $this -> u64($size);
         $this -> write($buffer, strlen($buffer));
     }
     
     /**
-     * @param string $type
+     * @param PropertyTypes $type
      * @param array $property
      * @return int
+     * @throws \Php2Core\Exceptions\NotImplementedException
      */
-    private function propertyNested(string $type, array $property): int
+    private function propertyInner(PropertyTypes $type, array $property): int
     {
-        switch($type)
+        $size = 0;
+        if(isset($property['custom_property']))
         {
-			case 'EnumProperty':
-				$this -> fString($property["value"]["type"]);
-				$this -> optionalGuid($property["id"]);
-				$start = $this -> tell();
-				$this -> fString($property["value"]["value"]);
-				return $this -> tell() - $start;
-            case 'StrProperty':
-                $this -> optionalGuid($property['id']);
-                $start = $this -> tell();
-                $this -> fString($property['value']);
-                return $this -> tell() - $start;
-            case 'BoolProperty':
-                $this -> bool($property['value']);
-                $this -> optionalGuid($property['id']);
-                return 0;
-            case 'FloatProperty':
-                $this -> optionalGuid($property['id']);
-                $this -> float($property['value']);
-                return 4;
-            case 'IntProperty':
-                $this -> optionalGuid($property['id']);
-                $this -> i32($property['value']);
-                return 4;
-            case 'StructProperty':
-                return $this -> struct($property);
-            default:
-                echo '<xmp>';
-                var_dump(__FILE__.':'.__LINE__);
-                var_dumP($type);
-                print_r($property);
-                echo '</xmp>';
+            throw new \Php2Core\Exceptions\NotImplementedException('Custom Property');
         }
-        return 0;
+        else
+        {
+            switch($type)
+            {
+                case PropertyTypes::IntProperty:
+                    $this -> optionalGuid($property['id']);
+                    $this -> i32($property['value']);
+                    $size = 4;
+                    break;
+                case PropertyTypes::StructProperty:
+                    $size = $this -> struct($property);
+                    break;
+                case PropertyTypes::EnumProperty:
+                    $this -> fString($property['value']['type']);
+                    $this -> optionalGuid($property['id']);
+                    
+                    $start = $this -> tell();
+                    $this -> fString($property['value']['value']);
+                    $size = $this -> tell() - $start;
+                    break;
+                case PropertyTypes::StrProperty:
+                    $this -> optionalGuid($property['id']);
+                    $start = $this -> tell();
+                    $this -> fString($property['value']);
+                    $size = $this -> tell() - $start;
+                    break;
+                case PropertyTypes::BoolProperty:
+                    $this -> bool((int)$property['value'] === 0 ? false : true);
+                    $this -> optionalGuid($property['id']);
+                    break;
+                case PropertyTypes::FloatProperty:
+                    $this -> optionalGuid($property['id']);
+                    $this -> float($property['value']);
+                    $size = 4;
+                    break;
+                default:
+                    throw new \Php2Core\Exceptions\NotImplementedException('ProprtyType: '.$type -> value);
+            }
+            
+        }
+        return $size;
     }
     
     /**
@@ -95,37 +106,32 @@ class Writer extends \Php2Core\IO\Data\BinaryStreamWriter
         $this -> fString($property['struct_type']);
         $this -> guid($property['struct_id']);
         $this -> optionalGuid($property['id']);
-        
         $start = $this -> tell();
-        $this -> structValue($property['struct_type'], $property['value']);
+        $this -> structValue(PropertyTypes::fromString($property['struct_type']), $property['value']);
         return $this -> tell() - $start;
     }
     
-	/**
-	 * @param string $structType
-	 * @param mixed $value
-	 * @return void
-	 */
-    private function structValue(string $structType, mixed $value): void
+    /**
+     * @param PropertyTypes|null $type
+     * @param mixed $value
+     * @return void
+     * @throws \Php2Core\Exceptions\NotImplementedException
+     */
+    private function structValue(?PropertyTypes $type, mixed $value): void
     {
-        switch($structType)
+        switch($type)
         {
-            case 'DateTime':
+            case PropertyTypes::DateTime:
                 $this -> u64($value);
                 break;
-            case 'Vector':
-            case 'Guid':
-            case 'Quat':
-            case 'LinearColor':
-                echo '<xmp>';
-                var_dump(__FILE__.':'.__LINE__);
-                var_dumP($structType);
-                print_r($value);
-                echo '</xmp>';
-                break;
+            case PropertyTypes::Vector:
+            case PropertyTypes::Guid:
+            case PropertyTypes::Quat:
+            case PropertyTypes::LinearColor:
+                throw new \Php2Core\Exceptions\NotImplementedException('PropertyType: '.$type -> value);
             default:
                 $this -> properties($value);
-                break;
         }
+        
     }
 }
