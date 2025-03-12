@@ -3,7 +3,7 @@ namespace Php2Core\Gaming\Engines\Unreal\Gvas;
 
 enum PropertyTypes: string
 {
-    use \Php2Core\Collections\Enum\TInfo;
+    use \Php2Core\Data\Collections\Enum\TInfo;
 
     case ArrayProperty = 'ArrayProperty';
     case EnumProperty = 'EnumProperty';
